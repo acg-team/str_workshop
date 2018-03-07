@@ -1,0 +1,38 @@
+# in bash
+## try the TRF yourself
+
+wget 'http://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/chr1.fa.gz'
+gunzip chr1.fa.gz
+./trf409.linux64 chrY.fa 2 7 7 80 10 50 100 -f -d -m
+
+
+# stop it early, as it takes a while
+more chr1.fa.2.7.7.80.10.50.500.txt.html
+
+## Ok let's start! download to your local machine and check out the files first
+
+head oncogene.bed
+head tsg.bed
+head str.bed
+
+### identify the STRs using the bedtools
+
+module add UHTS/Analysis/BEDTools/2.26.0;
+bedtools window -a tsg.bed -b str.bed| awk '{dif=$6-$2; print dif}' > tsg_dist
+bedtools window -a oncogene.bed -b str.bed| awk '{dif=$6-$2; print dif}' > oncogene_dist
+
+######################
+
+## in R
+
+# read in the files, compute the means and compare
+onc=read.table("oncogene_dist")
+tsg=read.table("tsg_dist")
+mean(tsg[,1])
+mean(onc[,1])
+wilcox.test(tsg[,1],onc[,1])
+
+# draw the boxplot distributions
+
+boxplot(tsg[,1],onc[,1], col = c("sandybrown", "forestgreen"), ylab= "Distance to TSS", notch=TRUE,cex.lab=1.5) 
+legend(1.1, 800000, c("tsg", "oncogene"), fill = c("sandybrown", "forestgreen"), cex=1.5)
